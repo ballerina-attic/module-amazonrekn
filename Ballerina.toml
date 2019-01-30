@@ -1,0 +1,8 @@
+[project]
+org-name = "wso2"
+version = "0.1.0"
+authors = ["WSO2"]
+keywords = ["amazon", "rekognition", "ml"]
+repository = "https://github.com/wso2-ballerina/module-amazonrekn"
+license = "Apache-2.0"
+
