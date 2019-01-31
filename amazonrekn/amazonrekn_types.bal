@@ -14,6 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+# Represents a Label result in Amazon Rekognition.
+#
+# + name - The name of the label
+# + confidence - The confidence level this label is detected as a percentage value
 public type Label record {
     string name;
     int confidence;    

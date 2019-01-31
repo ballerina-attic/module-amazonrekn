@@ -14,14 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
-import ballerina/internal;
-import ballerina/time;
-import ballerina/http;
 import ballerina/crypto;
-import ballerina/system;
 import ballerina/encoding;
-
+import ballerina/http;
+import ballerina/internal;
+import ballerina/io;
+import ballerina/system;
+import ballerina/time;
 import wso2/amazoncommons;
 
 # Object to initialize the connection with Amazon Rekognition Service.
@@ -46,11 +45,13 @@ public type Client client object {
                             string payload) returns json|error;
 
     # Detects the text in the given image data or the S3 object.
+    #
     # + input - The input as an image byte[] or an `S3Object` record
     # + return - The detected text or an `error` object if the operation failed
     public remote function detectText(amazoncommons:S3Object|byte[] input) returns string|error;
 
     # Detects the labels in the given image data or the S3 object.
+    #
     # + input - The input as an image byte[] or an `S3Object` record
     # + maxLabels - The maximum number of labels to be returned, -1 is unlimited
     # + minConfidence - The minimum confidence level of the detection to return results
@@ -152,6 +153,7 @@ public remote function Client.detectLabels(amazoncommons:S3Object|byte[] input, 
 }
 
 # Azure Rekognition Service configuration.
+#
 # + accessKey - The Amazon access key
 # + secretKey - The Amazon secret key
 # + region    - The Amazon region

@@ -14,5 +14,5 @@
 // specific language governing permissions and limitations
 // under the License.
 
-public const REKN_SERVICE_NAME = "rekognition";
-final string REKN_CONTENT_TYPE = "application/x-amz-json-1.1";
+const REKN_SERVICE_NAME = "rekognition";
+const REKN_CONTENT_TYPE = "application/x-amz-json-1.1";
