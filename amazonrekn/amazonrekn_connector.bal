@@ -43,7 +43,7 @@ public type Client client object {
     }
 
     function execReknAction(string accessKey, string secretKey, string region, string action,
-                            string payload) returns string|error;
+                            string payload) returns json|error;
 
     # Detects the text in the given image data or the S3 object.
     # + input - The input as an image byte[] or an `S3Object` record
@@ -61,7 +61,7 @@ public type Client client object {
 };
 
 function Client.execReknAction(string accessKey, string secretKey, string region, string action,
-                               string payload) returns string|error {
+                               string payload) returns json|error {
     string host = REKN_SERVICE_NAME + "." + region + "." + amazoncommons:AMAZON_HOST;
     string amzTarget = "RekognitionService." + action;
     time:Time time = time:toTimeZone(time:currentTime(), "GMT");
@@ -84,7 +84,12 @@ function Client.execReknAction(string accessKey, string secretKey, string region
     }
     var httpResponse = self.clientEp->post("/", request);
     if (httpResponse is http:Response) {
-        return httpResponse.getPayloadAsString();
+        json result = check parseJson(check httpResponse.getPayloadAsString());
+        if (httpResponse.statusCode != http:OK_200) {
+            error err = error(<string> result.__type, { message: <string> result.message });
+            return err;
+        }
+        return result;
     } else {
         return httpResponse;
     } 
@@ -107,9 +112,8 @@ function parseJson(string data) returns json|error {
 
 public remote function Client.detectText(amazoncommons:S3Object|byte[] input) returns string|error {
     json payload = createImageJson(input);
-    string result = check self.execReknAction(self.accessKey, self.secretKey, self.region, "DetectText",
+    json jr = check self.execReknAction(self.accessKey, self.secretKey, self.region, "DetectText",
                                               check string.convert(payload));
-    json jr = check parseJson(result);
     string strResult = "";
     int dcount = jr.TextDetections.length();
     int i = 0;
@@ -134,9 +138,8 @@ public remote function Client.detectLabels(amazoncommons:S3Object|byte[] input, 
         payload.MaxLabels = maxLabels;
     }
     payload.MinConfidence = minConfidence;
-    string result = check self.execReknAction(self.accessKey, self.secretKey, self.region, "DetectLabels",
+    json jr = check self.execReknAction(self.accessKey, self.secretKey, self.region, "DetectLabels",
                                               check string.convert(payload));
-    json jr = check parseJson(result);
     int dcount = jr.Labels.length();
     int i = 0;
     Label[] labels = [];
