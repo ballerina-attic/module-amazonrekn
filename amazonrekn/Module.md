@@ -1,30 +1,52 @@
-Connects to Azure Blob service through Ballerina.
+Connects to Amazon Rekognition service through Ballerina.
 
 # Module Overview
 
 ## Compatibility
 | Ballerina Language Version 
 | -------------------------- 
-| 0.990.0                    
+| 0.990.3                    
 
 ## Sample
 
 ```ballerina
 import ballerina/config;
 import ballerina/io;
-import wso2/azureblob;
+import wso2/amazonrekn;
+import wso2/amazoncommons;
 
-azureblob:Configuration config = {
+amazonrekn:Configuration config = {
     accessKey: config:getAsString("ACCESS_KEY"),
-    account: config:getAsString("ACCOUNT")
+    secretKey: config:getAsString("SECRET_KEY")
 };
 
-azureblob:Client blobClient = new(config);
+amazonrekn:Client reknClient = new(config);
 
-public function main(string... args) {
-    _ = blobClient->createContainer("ctnx1");
-    _ = blobClient->putBlob("ctnx1", "blob1", [1, 2, 3, 4, 5]);
-    var result = blobClient->getBlob("ctnx1", "blob1");
-    io:println(result);
+public function main() {
+    byte[] data = readFile("input.jpeg");
+    var result1 = reknClient->detectLabels(untaint data);
+    io:println(result1);
+
+    amazoncommons:S3Object s3obj = { bucket: "mybucket", name: "input.jpeg" };
+    var result2 = reknClient->detectText(s3obj);
+    io:println(result2);
+}
+
+function readFile(string path) returns byte[] {
+    io:ReadableByteChannel ch = io:openReadableFile(path);
+    byte[] output = [];
+    int i = 0;
+    while (true) {
+        (byte[], int) (buff, n) = check ch.read(1000);
+        if (n == 0) {
+            break;
+        }
+        foreach byte b in buff {
+            output[i] = b;
+            i += 1;
+        }
+    }
+    _ = ch.close();
+    return output;
 }
 ```

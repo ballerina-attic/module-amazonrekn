@@ -28,7 +28,7 @@ Client reknClient = new(config);
 
 @test:Config
 function testDetectText() {
-    byte[] data = readFile("amazonrekn/tests/resources/input.jpeg");
+    byte[] data = readFile("amazonrekn/tests/resources/text.jpeg");
     var result = reknClient->detectText(untaint data);
     if (result is string) {
         test:assertTrue(result == "NOTHING\nEXISTS\nEXCEPT\nATOMS\nAND EMPTY\nSPACE.\nEverything else\nis opinion.");
@@ -37,6 +37,23 @@ function testDetectText() {
     }
 }
 
+@test:Config
+function testDetectLabels() {
+    byte[] data = readFile("amazonrekn/tests/resources/dog-woman.jpeg");
+    var result = reknClient->detectLabels(untaint data);
+    if (result is Label[]) {
+        boolean found = false;
+        foreach Label label in result {
+            if (label.name == "Dog") {
+                found = true;
+                break;
+            }
+        }
+        test:assertTrue(found);
+    } else {
+        test:assertTrue(false);
+    }
+}
 
 function readFile(string path) returns byte[] {
     io:ReadableByteChannel ch = io:openReadableFile(path);
