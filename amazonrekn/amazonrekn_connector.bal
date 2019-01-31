@@ -151,7 +151,7 @@ public remote function Client.detectLabels(amazoncommons:S3Object|byte[] input, 
     return labels;
 }
 
-# Azure Blob Service configuration.
+# Azure Rekognition Service configuration.
 # + accessKey - The Amazon access key
 # + secretKey - The Amazon secret key
 # + region    - The Amazon region

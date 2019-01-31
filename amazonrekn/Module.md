@@ -1,4 +1,4 @@
-Connects to Amazon Rekognition service through Ballerina.
+Connects to Amazon Rekognition service.
 
 # Module Overview
 
