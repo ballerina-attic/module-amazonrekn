@@ -152,7 +152,7 @@ public remote function Client.detectLabels(amazoncommons:S3Object|byte[] input, 
     return labels;
 }
 
-# Azure Rekognition Service configuration.
+# Amazon Rekognition Service configuration.
 #
 # + accessKey - The Amazon access key
 # + secretKey - The Amazon secret key
