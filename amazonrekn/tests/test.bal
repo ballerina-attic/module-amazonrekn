@@ -20,13 +20,38 @@ import ballerina/io;
 
 Configuration config = {
     accessKey: config:getAsString("ACCESS_KEY"),
-    secretKey: config:getAsString("SECRET_KEY")
+    secretKey: config:getAsString("SECRET_KEY"),
+    region: "us-east-1"
 };
 
 Client reknClient = new(config);
 
 @test:Config
-function testXXX() {
-
+function testDetectText() {
+    byte[] data = readFile("amazonrekn/tests/resources/input.jpeg");
+    var result = reknClient->detectText(untaint data);
+    if (result is string) {
+        test:assertTrue(result == "NOTHING\nEXISTS\nEXCEPT\nATOMS\nAND EMPTY\nSPACE.\nEverything else\nis opinion.");
+    } else {
+        test:assertTrue(false);
+    }
 }
 
+
+function readFile(string path) returns byte[] {
+    io:ReadableByteChannel ch = io:openReadableFile(path);
+    byte[] output = [];
+    int i = 0;
+    while (true) {
+        (byte[], int) (buff, n) = check ch.read(1000);
+        if (n == 0) {
+            break;
+        }
+        foreach byte b in buff {
+            output[i] = b;
+            i += 1;
+        }
+    }
+    _ = ch.close();
+    return output;
+}

@@ -15,11 +15,13 @@
 // under the License.
 
 import ballerina/io;
+import ballerina/internal;
 import ballerina/time;
 import ballerina/http;
 import ballerina/crypto;
 import ballerina/system;
 import ballerina/encoding;
+
 import wso2/amazoncommons;
 
 # Object to initialize the connection with Amazon Rekognition Service.
@@ -43,7 +45,10 @@ public type Client client object {
     function execReknAction(string accessKey, string secretKey, string region, string action,
                             string payload) returns string|error;
 
-    public remote function detectText(amazoncommons:S3Object|byte[] input) returns json|error;
+    # Detects the text in the given image data or the S3 object.
+    # + input - The input as an image byte[] or an `S3Object` record
+    # + return - The detected text or an `error` object if the operatio failed
+    public remote function detectText(amazoncommons:S3Object|byte[] input) returns string|error;
 
 };
 
@@ -78,7 +83,39 @@ function Client.execReknAction(string accessKey, string secretKey, string region
 }
 
 public remote function Client.detectText(amazoncommons:S3Object|byte[] input) returns string|error {
-    return self.execReknAction(self.accessKey, self.secretKey, self.region, "DetectText", "{}");
+    json payload;
+    if (input is byte[]) {
+        payload = { Image: { Bytes: encoding:encodeBase64(input) } };
+    } else {
+        payload = { Image: { S3Object: { Bucket: input.bucket, Name: input.name } } };
+    }
+    var result = self.execReknAction(self.accessKey, self.secretKey, self.region, "DetectText",
+                                     check string.convert(payload));
+    if (result is string) {
+        io:StringReader reader = new(result);
+        var jr = reader.readJson();
+        if (jr is json) {
+            string strResult = "";
+            int dcount = jr.TextDetections.length();
+            int i = 0;
+            int lineCount = 0;
+            while (i < dcount) {
+                if (jr.TextDetections[i].Type == "LINE") {
+                    if (lineCount > 0) {
+                        strResult = strResult + "\n";
+                    }
+                    strResult = strResult + <string> jr.TextDetections[i].DetectedText;
+                    lineCount = lineCount + 1;
+                }
+                i = i + 1;
+            }
+            return strResult;
+        } else {
+            return jr;
+        }
+    } else {
+        return result;
+    }
 }
 
 # Azure Blob Service configuration.
@@ -88,7 +125,7 @@ public remote function Client.detectText(amazoncommons:S3Object|byte[] input) re
 public type Configuration record {
     string accessKey;
     string secretKey;
-    string region = "us-east-1";
+    string region = amazoncommons:DEFAULT_REGION;
 };
 
 
